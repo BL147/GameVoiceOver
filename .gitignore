@@ -1,0 +1,60 @@
+# Environment Variables
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+venv/
+.venv/
+ENV/
+env/
+
+# SQLite Database
+*.db
+*.sqlite3
+
+# Node & Frontend
+node_modules/
+.npm
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+# Media uploads & scratch files (game cutscenes, audio)
+uploads/
+storage/
+temp/
+*.mp4
+*.mkv
+*.avi
+*.wav
+*.mp3
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
