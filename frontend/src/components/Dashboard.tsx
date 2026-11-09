@@ -9,7 +9,8 @@ import {
   Search, 
   RefreshCw,
   Film,
-  AudioLines
+  AudioLines,
+  Volume2
 } from 'lucide-react';
 import { Project } from '../types';
 
@@ -17,6 +18,7 @@ interface DashboardProps {
   projects: Project[];
   isLoading: boolean;
   onOpenCreateModal: () => void;
+  onOpenProject: (project: Project) => void;
   onDeleteProject: (id: string) => Promise<void>;
   onRefresh: () => void;
 }
@@ -25,6 +27,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   projects,
   isLoading,
   onOpenCreateModal,
+  onOpenProject,
   onDeleteProject,
   onRefresh,
 }) => {
@@ -38,7 +41,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (confirm('Are you sure you want to delete this project?')) {
+    if (confirm('Are you sure you want to delete this project? All extracted cutscene files will be removed.')) {
       try {
         setDeletingId(id);
         await onDeleteProject(id);
@@ -54,25 +57,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
       return d.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        year: 'numeric'
       });
     } catch {
       return isoString;
     }
   };
 
-  const getStatusBadge = (status: Project['status']) => {
+  const getStatusBadge = (status: Project['status'], hasVideo: boolean) => {
+    if (hasVideo) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          Cutscene Ready
+        </span>
+      );
+    }
     switch (status) {
-      case 'ready':
-      case 'completed':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            Ready
-          </span>
-        );
       case 'processing':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/30">
@@ -80,11 +81,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
             Processing
           </span>
         );
+      case 'failed':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+            Failed
+          </span>
+        );
       default:
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-500/10 text-slate-400 border border-slate-500/30">
             <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-            Draft
+            No Video
           </span>
         );
     }
@@ -134,11 +142,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         <div className="p-5 rounded-2xl bg-studio-800/90 border border-studio-700/80 flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Pipeline Engine</p>
-            <p className="text-sm font-semibold text-emerald-400 mt-1 flex items-center gap-1.5">
-              <span>FastAPI + SQLite</span>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Cutscenes Uploaded</p>
+            <p className="text-2xl font-bold text-emerald-400 mt-1">
+              {projects.filter(p => p.has_video).length}
             </p>
-            <p className="text-[11px] text-slate-500 mt-0.5">Phase 1 Baseline Ready</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">FFmpeg Processed</p>
           </div>
           <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <Film className="w-5 h-5" />
@@ -147,9 +155,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         <div className="p-5 rounded-2xl bg-studio-800/90 border border-studio-700/80 flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Voiceover AI</p>
-            <p className="text-sm font-semibold text-indigo-300 mt-1">Gnani Timbre v3.0</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">13 Voices with Emotion Tags</p>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Dialogue Stems</p>
+            <p className="text-2xl font-bold text-indigo-300 mt-1">
+              {projects.filter(p => p.has_audio).length}
+            </p>
+            <p className="text-[11px] text-slate-500 mt-0.5">48kHz Mono WAV Extracted</p>
           </div>
           <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
             <AudioLines className="w-5 h-5" />
@@ -182,7 +192,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
           <h3 className="text-lg font-semibold text-white">No voiceover projects yet</h3>
           <p className="text-sm text-slate-400 max-w-md mx-auto mt-1 mb-6">
-            Get started by creating your first cutscene project. You will be able to extract dialogue and assign voice actors in upcoming phases.
+            Get started by creating your first cutscene project. You can upload an MP4 or MOV cutscene to extract frames and dialogue audio.
           </p>
           <button
             onClick={onOpenCreateModal}
@@ -197,15 +207,37 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {filteredProjects.map((project) => (
             <div
               key={project.id}
-              className="group relative rounded-2xl bg-studio-800 border border-studio-700 hover:border-indigo-500/50 transition-all p-5 shadow-lg flex flex-col justify-between"
+              onClick={() => onOpenProject(project)}
+              className="group relative rounded-2xl bg-studio-800 border border-studio-700 hover:border-indigo-500/50 transition-all shadow-lg flex flex-col justify-between overflow-hidden cursor-pointer hover:shadow-indigo-500/5"
             >
-              <div>
+              {/* Optional Cutscene Thumbnail Poster */}
+              {project.thumbnail_url ? (
+                <div className="relative aspect-video w-full bg-black overflow-hidden border-b border-studio-700">
+                  <img
+                    src={project.thumbnail_url}
+                    alt={project.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {project.duration && (
+                    <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-mono bg-black/80 text-white">
+                      {Math.floor(project.duration / 60)}:{(Math.floor(project.duration % 60)).toString().padStart(2, '0')}
+                    </span>
+                  )}
+                  {project.has_audio && (
+                    <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[10px] font-mono bg-indigo-600/80 text-white flex items-center gap-1">
+                      <Volume2 className="w-3 h-3" /> Audio
+                    </span>
+                  )}
+                </div>
+              ) : null}
+
+              <div className="p-5 flex-1">
                 {/* Header with Status and ID */}
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-studio-750 text-indigo-400 border border-studio-700">
                     {project.id}
                   </span>
-                  {getStatusBadge(project.status)}
+                  {getStatusBadge(project.status, project.has_video)}
                 </div>
 
                 {/* Title & Description */}
@@ -213,18 +245,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {project.name}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1 line-clamp-2 min-h-[32px]">
-                  {project.description || 'No description provided.'}
+                  {project.description || (project.has_video ? `Cutscene: ${project.video_filename}` : 'No description provided.')}
                 </p>
               </div>
 
               {/* Footer info & actions */}
-              <div className="mt-5 pt-4 border-t border-studio-700/60 flex items-center justify-between text-xs text-slate-400">
+              <div className="px-5 pb-5 pt-3 border-t border-studio-700/60 flex items-center justify-between text-xs text-slate-400">
                 <div className="flex items-center gap-1.5 text-[11px]">
                   <Clock className="w-3.5 h-3.5 text-slate-500" />
                   <span>{formatDate(project.created_at)}</span>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={(e) => handleDelete(e, project.id)}
                     disabled={deletingId === project.id}
@@ -234,10 +266,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <Trash2 className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => alert(`Project ${project.name} selected. Video cutscene upload will be enabled in Phase 2!`)}
+                    onClick={() => onOpenProject(project)}
                     className="px-2.5 py-1.5 bg-studio-700 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-lg flex items-center gap-1 text-xs font-medium transition"
                   >
-                    <span>Open</span>
+                    <span>{project.has_video ? 'Studio' : 'Upload'}</span>
                     <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>

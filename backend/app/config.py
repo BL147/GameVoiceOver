@@ -18,6 +18,12 @@ class Settings:
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./gamevoiceover.db")
     
+    # Media & Video Storage
+    STORAGE_DIR: Path = BASE_DIR / "storage"
+    MAX_UPLOAD_SIZE_BYTES: int = int(os.getenv("MAX_UPLOAD_SIZE_BYTES", 150 * 1024 * 1024))  # 150 MB
+    ALLOWED_VIDEO_EXTENSIONS: set[str] = {".mp4", ".mov"}
+    ALLOWED_VIDEO_MIME_TYPES: set[str] = {"video/mp4", "video/quicktime", "application/octet-stream"}
+    
     # API Keys (to be filled in later phases)
     GNANI_API_KEY: str = os.getenv("GNANI_API_KEY", "")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")

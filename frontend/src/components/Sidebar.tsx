@@ -17,7 +17,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const navItems = [
     { id: 'dashboard', label: 'Projects & Studio', icon: LayoutDashboard },
-    { id: 'cutscenes', label: 'Cutscenes', icon: Film, badge: 'Phase 2' },
+    { id: 'cutscenes', label: 'Cutscenes', icon: Film, badge: 'Ready' },
     { id: 'voices', label: 'Voice Lab', icon: Mic2, badge: 'Phase 4' },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
